@@ -1,4 +1,4 @@
-use std::io::{Write, Result as IoResult};
+use std::io::{Result as IoResult, Write};
 
 use super::StatusCode;
 
@@ -8,7 +8,7 @@ pub struct Response {
     body: Option<String>,
 }
 
-impl  Response {
+impl Response {
     pub fn new(status_code: StatusCode, body: Option<String>) -> Self {
         Response { status_code, body }
     }
@@ -25,5 +25,19 @@ impl  Response {
             self.status_code.reason_phrase(),
             body,
         )
+    }
+
+    pub fn ok(body: Option<String>) -> Self {
+        Response {
+            status_code: StatusCode::OK,
+            body: body,
+        }
+    }
+
+    pub fn not_found() -> Self {
+        Response {
+            status_code: StatusCode::NotFound,
+            body: None,
+        }
     }
 }

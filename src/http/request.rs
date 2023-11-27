@@ -33,7 +33,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     fn try_from(buf: &'buf [u8]) -> Result<Request<'buf>, Self::Error> {
         let request = from_utf8(buf)?;
 
-        println!("{}", request);
+        println!("Request : {}", request);
 
         let (method, request) = get_next_word(request).ok_or(RequestError::InvalidRequest)?;
         let (mut path_string, request) = get_next_word(request).ok_or(RequestError::InvalidRequest)?;
@@ -54,7 +54,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 
         // Find index of '?' and make condition
         if let Some(i) = path_string.find('?') {
-            query_string = Some(Query::from(&path_string[i + 1..])); // a=1&b=2
+            query_string = Some(Query::from(&path_string[i + 1..])); // a=1&b=2 (Plus one for prevent '?')
             path_string = &path_string[..i]; // /test
         }
 

@@ -32,17 +32,20 @@ impl<'buf> From<&'buf str> for Query<'buf> {
                 // To find '=' for separate key and value
                 if let Some(i) = split_value.find('=') {
                     k = &split_value[..i]; // Key
-                    v = &split_value[i + 1..]; // Value
+                    v = &split_value[i + 1..]; // Value (Plus one for prevent '=')
                 }
 
-                data.entry(k) // To entry the key
+                // HashMap 'entry' is finding the key for manipulation
+                data.entry(k)
                     .and_modify(|exist: &mut Value| match exist {
                         Value::Single(prev_val) => {
+                            // Dereference 'exist' to get value from 'Value::Single'
+                            // And change to 'Value::Multiple' from 'Value::Single' for support multiple of values
                             *exist = Value::Multiple(vec![prev_val, v]);
                         } // If key is duplicated, then change to 'Value::Multiple' for save multipe of values by key
-                        Value::Multiple(prev_vec) => prev_vec.push(v), // Push to vector for previous of value
+                        Value::Multiple(prev_vec) => prev_vec.push(v), // Push to vector for new value
                     }) // To find the key and modify previous of value
-                    .or_insert(Value::Single(v)); // By default to insert value with key
+                    .or_insert(Value::Single(v)); // By default to insert value if mismatch the key
             }
         }
 

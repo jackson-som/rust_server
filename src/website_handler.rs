@@ -1,9 +1,14 @@
 use super::http::{Request, RequestError, RequestMethod, Response, StatusCode};
-use super::server::Handler;
 use std::fs;
 
+pub trait Handler {
+    fn handle_request(&mut self, request: &Request) -> Response;
+
+    fn handle_error_request(&mut self, e: &RequestError) -> Response;
+}
+
 pub struct WebsiteHandler {
-    public_path: String
+    public_path: String,
 }
 
 impl WebsiteHandler {
@@ -13,7 +18,7 @@ impl WebsiteHandler {
 
     pub fn read_file(&self, file_path: &str) -> Option<String> {
         let path = format!("{}/{}", self.public_path, file_path);
-        
+
         // Make more secure for path by using 'fs::canonicalize'
         match fs::canonicalize(path) {
             Ok(path) => {
@@ -24,7 +29,7 @@ impl WebsiteHandler {
                 //     println!("Directory Traversal Attach Attempted: {}", file_path);
                 //     None
                 // }
-            },
+            }
             Err(_) => None,
         }
     }
@@ -35,12 +40,12 @@ impl Handler for WebsiteHandler {
         match req.method() {
             RequestMethod::Post => todo!(),
             RequestMethod::Get => match req.path() {
-                "/" => Response::new(StatusCode::OK, self.read_file("index.html")),
-                "/hello" => Response::new(StatusCode::OK, self.read_file("hello.html")),
+                "/" => Response::ok(self.read_file("index.html")),
+                "/hello" => Response::ok(self.read_file("hello.html")),
                 path => match self.read_file(path) {
-                    Some(content) => Response::new(StatusCode::OK, Some(content)),
-                    None => Response::new(StatusCode::NotFound, None),
-                }
+                    Some(content) => Response::ok(Some(content)),
+                    None => Response::not_found(),
+                },
             },
             RequestMethod::Put => todo!(),
             RequestMethod::Delete => todo!(),
@@ -49,7 +54,6 @@ impl Handler for WebsiteHandler {
             RequestMethod::Patch => todo!(),
             RequestMethod::Trace => todo!(),
             RequestMethod::Options => todo!(),
-            _ => Response::new(StatusCode::NotFound, None),
         }
     }
 

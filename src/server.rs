@@ -1,11 +1,5 @@
-use crate::http::{Request, RequestError, Response};
+use crate::{http::Request, website_handler::Handler};
 use std::{io::Read, net::TcpListener};
-
-pub trait Handler {
-    fn handle_request(&mut self, request: &Request) -> Response;
-
-    fn handle_error_request(&mut self, e: &RequestError) -> Response;
-}
 
 #[derive(Debug)]
 pub struct Server {
